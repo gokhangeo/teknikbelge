@@ -13,25 +13,26 @@
 <body class="bg-slate-50 min-h-screen text-slate-800">
 
     <div class="max-w-6xl mx-auto p-4 md:p-6">
-        <!-- Başlık Bölümü -->
+        <!-- Baslik Bolumu -->
         <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b pb-6">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">PLAN ÖRNEĞİ VE TEKNİK BELGE TALEPLERİ GÖREVLENDİRME</h1>
                 <p class="text-slate-500 mt-1">Günlük personel iş dağılımı, takip ve arşivleme paneli</p>
             </div>
-            <!-- Otomatik Kayıt Durumu Göstergesi -->
+            <!-- Otomatik Kayit Durumu Gostergesi -->
             <div class="flex items-center gap-2 self-start md:self-center bg-white px-4 py-2 rounded-full shadow-sm border">
                 <span id="status-dot" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
                 <span id="status-text" class="text-xs font-semibold text-slate-600">Sistem Başlatılıyor...</span>
+                <button id="btn-reconnect" onclick="init()" class="hidden text-xs text-blue-600 hover:text-blue-800 font-bold ml-2 underline">Yeniden Bağlan</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Sol Sütun: İş Girişi ve Tarih Seçimi -->
+            <!-- Sol Sutun: Is Girisi ve Tarih Secimi -->
             <div class="lg:col-span-2 space-y-6">
                 
-                <!-- Tarih Seçimi ve Özet -->
+                <!-- Tarih Secimi ve Ozet -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <span class="p-3 bg-blue-50 text-blue-600 rounded-xl">
@@ -48,7 +49,7 @@
                     </div>
                 </div>
 
-                <!-- Günlük İş Giriş Listesi -->
+                <!-- Gunluk Is Giris Listesi -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <h2 class="font-bold text-slate-800 flex items-center gap-2">
@@ -58,38 +59,42 @@
                         <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-3 py-1 rounded-full" id="tarih-etiket"></span>
                     </div>
                     <div id="personel-list" class="divide-y divide-slate-100 max-h-[550px] overflow-y-auto">
-                        <!-- Dinamik olarak doldurulacak -->
+                        <!-- Dinamik doldurulacak -->
                     </div>
                 </div>
 
             </div>
 
-            <!-- Sağ Sütun: Personel Yönetimi ve Tarihsel Geçmiş Raporları -->
+            <!-- Sag Sutun: Personel Yonetimi ve Tarihsel Gecmis Raporlari -->
             <div class="space-y-6">
                 
-                <!-- Personel Yönetim Paneli -->
+                <!-- Personel Yonetim Paneli -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                         Personel Yönetimi
                     </h2>
-                    <div class="flex gap-2 mb-4">
+                    <div class="flex gap-2 mb-2">
                         <input type="text" id="yeni-personel" placeholder="Yeni Personel Adı" class="border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none p-2.5 rounded-xl flex-grow text-sm">
                         <button onclick="personelEkle()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition text-sm">Ekle</button>
                     </div>
+                    <button onclick="varsayilanYukle()" class="w-full text-left text-xs text-indigo-500 hover:text-indigo-700 font-medium mb-4 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3 3L22 4"></path></svg>
+                        Varsayılan 16 Personeli Geri Yükle / Sıfırla
+                    </button>
                     <div id="yonetim-list" class="max-h-44 overflow-y-auto border-t border-slate-100 pt-3 space-y-1">
                         <!-- Aktif Personeller Listesi -->
                     </div>
                 </div>
 
-                <!-- Tarihsel Geçmiş Raporlar -->
+                <!-- Tarihsel Gecmis Raporlar -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Tarihsel İcmal & Geçmiş İşler
                     </h2>
                     <div id="gecmis-listesi" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
-                        <!-- Tarih bazlı kayıtlar listelenecek -->
+                        <!-- Tarih bazli kayitlar -->
                     </div>
                 </div>
 
@@ -98,7 +103,7 @@
         </div>
     </div>
 
-    <!-- Özel Onay Modalı (Confirm Engelini Aşmak İçin) -->
+    <!-- Ozel Onay Modali -->
     <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200" id="modal-card">
             <h3 class="text-lg font-bold text-slate-900 mb-2" id="modal-title">Emin misiniz?</h3>
@@ -113,35 +118,45 @@
     <script>
         const token = "ghp_" + "1Im4128x" + "UP1uC8Oo" + "v8yBd7oahk" + "2S6a0aGBTj";
         const REPO = "gokhangeo/teknikbelge";
-        const FILE_PERSONELLER = "personel.json"; // personel.json olarak güncellendi
+        const FILE_PERSONELLER = "personel.json";
         const FILE_VERILER = "veriler.json";
+
+        // Orijinal 16 kisilik varsayilan liste
+        const VARSAYILAN_PERSONELLER = [
+            "AHMET ÇELİK", "AYŞE ÇAKICI PEKÇETİN", "DUDU POYRAZ", "ENGİN UĞURLU", 
+            "HASAN İN", "HÜSEYİN POYRAZ", "KENAN BAYDEMİR", "MEHMET CEYLAN", 
+            "MUSTAFA BAYSAL", "MUSTAFA GÜRBÜZ", "MÜJDE TÜRKMEN", "NURHAN ARSLAN", 
+            "ÖZLEM AYDINLI", "SEVAL ÇELİK", "ŞEHMUS ÖZTÜRK", "ŞEKİP KORKMAZ"
+        ];
 
         let personeller = [];
         let tumVeriler = {}; 
-        let personellerSha = "";
-        let verilerSha = "";
         let seciliTarih = "";
         let otoSaveTimer = null;
+        let githubOnline = true;
 
         function setStatus(text, type = "info") {
             const dot = document.getElementById('status-dot');
             const textEl = document.getElementById('status-text');
+            const reconnectBtn = document.getElementById('btn-reconnect');
             textEl.innerText = text;
             
             dot.className = "w-3 h-3 rounded-full animate-pulse ";
             if(type === "success") {
                 dot.classList.add("bg-emerald-500");
                 textEl.className = "text-xs font-semibold text-emerald-600";
+                reconnectBtn.classList.add('hidden');
             } else if(type === "error") {
                 dot.classList.add("bg-rose-500");
                 textEl.className = "text-xs font-semibold text-rose-600";
+                reconnectBtn.classList.remove('hidden');
             } else {
                 dot.classList.add("bg-amber-500");
                 textEl.className = "text-xs font-semibold text-amber-600";
+                reconnectBtn.classList.add('hidden');
             }
         }
 
-        // Özel Onay Fonksiyonu (Tarayıcı confirm engeline karşı)
         function customConfirm(title, desc, onConfirm) {
             const modal = document.getElementById('confirm-modal');
             const card = document.getElementById('modal-card');
@@ -172,6 +187,35 @@
         function utf8_to_b64(str) { return btoa(unescape(encodeURIComponent(str))); }
         function b64_to_utf8(str) { return decodeURIComponent(escape(atob(str))); }
 
+        async function robustFetch(url, options = {}, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    return res;
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        async function getLatestSha(path) {
+            if (!githubOnline) return null;
+            try {
+                const res = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    return data.sha;
+                }
+            } catch (e) {
+                console.warn("SHA sorgusu başarısız (Dosya yeni veya silinmiş olabilir):", path);
+            }
+            return null;
+        }
+
         async function init() {
             setStatus("Veriler yükleniyor...");
             
@@ -182,53 +226,73 @@
             tarihInput.max = bugun; 
             document.getElementById('tarih-etiket').innerText = formatTarih(bugun);
 
-            // 1. Personel Listesini Çek
+            personeller = JSON.parse(localStorage.getItem('isTakip_personeller'));
+            if (!personeller || personeller.length === 0) {
+                personeller = [...VARSAYILAN_PERSONELLER];
+            }
+            tumVeriler = JSON.parse(localStorage.getItem('isTakip_tumVeriler')) || {};
+            ekraniYenile();
+
+            // 1. Personel Listesini GitHub'dan çekmeyi dene
             try {
-                const resPersoneller = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, { 
+                const resPersoneller = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, { 
                     headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
                 });
+                
                 if(resPersoneller.ok) {
                     const data = await resPersoneller.json();
                     personeller = JSON.parse(b64_to_utf8(data.content));
-                    personellerSha = data.sha;
+                    localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
+                    githubOnline = true;
+                } else if(resPersoneller.status === 404) {
+                    githubOnline = true;
+                    // GitHub'da bulunamadıysa (silindiyse), yerel listeyi veya varsayılanı yükleyip yazdır
+                    await depoyaKaydetPersoneller();
                 } else {
-                    throw new Error();
+                    githubOnline = false;
                 }
-            } catch {
-                personeller = ["AHMET ÇELİK", "AYŞE ÇAKICI PEKÇETİN", "DUDU POYRAZ", "ENGİN UĞURLU", "HASAN İN", "HÜSEYİN POYRAZ", "KENAN BAYDEMİR", "MEHMET CEYLAN", "MUSTAFA BAYSAL", "MUSTAFA GÜRBÜZ", "MÜJDE TÜRKMEN", "NURHAN ARSLAN", "ÖZLEM AYDINLI", "SEVAL ÇELİK", "ŞEHMUS ÖZTÜRK", "ŞEKİP KORKMAZ"];
-                await depoyaKaydetPersoneller();
+            } catch (err) {
+                console.warn("GitHub bağlantı hatası, yerel mod etkinleşti.");
+                githubOnline = false;
             }
 
-            // 2. İş Verilerini Çek
-            try {
-                const resVeriler = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { 
-                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
-                });
-                if(resVeriler.ok) {
-                    const data = await resVeriler.json();
-                    tumVeriler = JSON.parse(b64_to_utf8(data.content));
-                    verilerSha = data.sha;
-                } else {
-                    throw new Error();
+            // 2. İş Verilerini GitHub'dan çekmeyi dene
+            if (githubOnline) {
+                try {
+                    const resVeriler = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { 
+                        headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
+                    });
+                    if(resVeriler.ok) {
+                        const data = await resVeriler.json();
+                        tumVeriler = JSON.parse(b64_to_utf8(data.content));
+                        localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
+                    } else if(resVeriler.status === 404) {
+                        await depoyaKaydetVeriler();
+                    } else {
+                        githubOnline = false;
+                    }
+                } catch (err) {
+                    githubOnline = false;
                 }
-            } catch {
-                tumVeriler = {};
-                await depoyaKaydetVeriler();
             }
 
-            const localYedek = localStorage.getItem('isTakip_tumVeriler');
-            if(localYedek && Object.keys(tumVeriler).length === 0) {
-                tumVeriler = JSON.parse(localYedek);
+            if (githubOnline) {
+                setStatus("Bulut eşitlemesi aktif", "success");
+            } else {
+                setStatus("Yerel Çalışma Modu (Yalnızca Tarayıcı)", "error");
             }
-
-            setStatus("Bağlantı kuruldu", "success");
+            
             ekraniYenile();
         }
 
         function formatTarih(tarihStr) {
-            const parts = tarihStr.split('-');
+            const parts = staticTarihSplit(tarihStr);
             if(parts.length !== 3) return tarihStr;
             return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+
+        function staticTarihSplit(str) {
+            return str.split('-');
         }
 
         function tarihDegisti() {
@@ -260,7 +324,6 @@
                 const adet = tumVeriler[seciliTarih][p] || 0;
                 gunToplam += adet;
 
-                // İş Giriş Kartı
                 container.innerHTML += `
                     <div class="flex items-center justify-between p-4 hover:bg-slate-50 transition">
                         <div class="flex flex-col">
@@ -277,7 +340,6 @@
                     </div>
                 `;
                 
-                // Yönetim Kartı
                 yonetimContainer.innerHTML += `
                     <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs hover:bg-slate-100/80 transition">
                         <span class="font-medium text-slate-700">${p}</span>
@@ -287,7 +349,9 @@
             });
 
             document.getElementById('gunluk-toplam').innerText = gunToplam;
+            
             localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
+            localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
 
             gecmisRaporlariYazdir();
         }
@@ -355,33 +419,83 @@
             );
         }
 
+        // Varsayilan listeyi sifirdan yukleme ve kaydetme
+        function varsayilanYukle() {
+            customConfirm(
+                "Listeyi Sıfırla",
+                "Mevcut personel listesini silip orijinal 16 kişilik listeyi geri yüklemek istediğinize emin misiniz?",
+                async () => {
+                    setStatus("Varsayılan liste yükleniyor...");
+                    personeller = [...VARSAYILAN_PERSONELLER];
+                    await depoyaKaydetPersoneller();
+                    ekraniYenile();
+                }
+            );
+        }
+
         async function depoyaKaydetPersoneller() {
+            localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
+            if (!githubOnline) {
+                setStatus("Yerel kaydedildi (Çevrimdışı mod)", "error");
+                return;
+            }
             try {
-                const body = { message: "Personel listesi güncellendi", content: utf8_to_b64(JSON.stringify(personeller)), sha: personellerSha };
-                const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                const latestSha = await getLatestSha(FILE_PERSONELLER);
+                const body = { 
+                    message: "Personel listesi güncellendi", 
+                    content: utf8_to_b64(JSON.stringify(personeller)) 
+                };
+                if(latestSha) {
+                    body.sha = latestSha;
+                }
+                
+                const res = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, {
+                    method: 'PUT', 
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
-                const data = await res.json(); 
-                personellerSha = data.content.sha;
-                setStatus("Personel listesi güncellendi.", "success");
+                
+                if(res.ok) {
+                    setStatus("Personel listesi güncellendi.", "success");
+                } else {
+                    setStatus("Yerel kaydedildi (Bulut eşitleme başarısız)", "error");
+                }
             } catch (err) {
-                setStatus("Hata: Personel listesi kaydedilemedi.", "error");
+                setStatus("Yerel kaydedildi (Bağlantı kesildi)", "error");
+                githubOnline = false;
             }
         }
 
         async function depoyaKaydetVeriler() {
+            localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
+            if (!githubOnline) {
+                setStatus("Yerel kaydedildi (Çevrimdışı mod)", "error");
+                return;
+            }
             try {
-                const body = { message: "İş verileri güncellendi", content: utf8_to_b64(JSON.stringify(tumVeriler)), sha: verilerSha };
-                const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                const latestSha = await getLatestSha(FILE_VERILER);
+                const body = { 
+                    message: "İş verileri güncellendi", 
+                    content: utf8_to_b64(JSON.stringify(tumVeriler))
+                };
+                if(latestSha) {
+                    body.sha = latestSha;
+                }
+                
+                const res = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, {
+                    method: 'PUT', 
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
-                const data = await res.json(); 
-                verilerSha = data.content.sha;
-                setStatus("Tüm veriler eşitlendi.", "success");
+                
+                if(res.ok) {
+                    setStatus("Tüm veriler eşitlendi.", "success");
+                } else {
+                    setStatus("Yerel kaydedildi (Eşitleme hatası)", "error");
+                }
             } catch (err) {
-                setStatus("Bağlantı hatası: Lokal kaydedildi.", "error");
+                setStatus("Yerel kaydedildi (Bağlantı kesildi)", "error");
+                githubOnline = false;
             }
         }
 
