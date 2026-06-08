@@ -13,9 +13,12 @@
 
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-lg font-semibold mb-4">Personel Yönetimi</h2>
-            <div class="flex gap-2">
+            <div class="flex gap-2 mb-4">
                 <input type="text" id="yeni-personel" placeholder="Yeni Personel Adı" class="border p-2 rounded flex-grow">
                 <button onclick="personelEkle()" class="bg-blue-600 text-white px-4 py-2 rounded">Ekle</button>
+            </div>
+            <div id="yonetim-list" class="max-h-40 overflow-y-auto border-t pt-2 space-y-1">
+                <!-- Tüm personeller burada listelenir -->
             </div>
             <p id="status" class="mt-4 text-sm text-gray-500"></p>
         </div>
@@ -33,78 +36,74 @@
 
     <script>
         const token = "ghp_" + "1Im4128x" + "UP1uC8Oo" + "v8yBd7oahk" + "2S6a0aGBTj";
-        const GIST_ID = "c7d75a452136e051394f49492167d471";
-        let personeller = [];
-        let veriler = {};
+        const REPO = "gokhangeo/teknikbelge";
+        const PATH = "personeller.json";
+        let personeller = [], veriler = {}, sha = "";
         const tarih = new Date().toISOString().split('T')[0];
         document.getElementById('tarih-baslik').innerText = tarih;
 
+        function utf8_to_b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+        function b64_to_utf8(str) { return decodeURIComponent(escape(atob(str))); }
+
         async function init() {
             try {
-                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, { headers: { 'Authorization': `token ${token}` }});
+                const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, { headers: { 'Authorization': `token ${token}` }});
                 const data = await res.json();
-                
-                if (data.files && data.files['personeller.json'] && data.files['personeller.json'].content) {
-                    personeller = JSON.parse(data.files['personeller.json'].content);
-                } else {
-                    // Eğer dosya yoksa veya boşsa, başlangıç listesi oluştur
-                    personeller = ["AHMET ÇELİK", "AYŞE ÇAKICI PEKÇETİN"];
-                    await githubGuncelle();
-                }
-                
-                veriler = JSON.parse(localStorage.getItem('isTakip_' + tarih)) || {};
-                personeller.forEach(p => { if (veriler[p] === undefined) veriler[p] = 0; });
-                guncelle();
-            } catch (err) {
-                console.error("Veri çekilirken hata oluştu:", err);
-                document.getElementById('status').innerText = "Hata: Personel listesi yüklenemedi.";
+                personeller = JSON.parse(b64_to_utf8(data.content));
+                sha = data.sha;
+            } catch {
+                personeller = ["AHMET ÇELİK", "AYŞE ÇAKICI PEKÇETİN"];
+                await depoyaKaydet();
             }
+            veriler = JSON.parse(localStorage.getItem('isTakip_' + tarih)) || {};
+            personeller.forEach(p => { if (veriler[p] === undefined) veriler[p] = 0; });
+            guncelle();
         }
 
         function guncelle() {
             localStorage.setItem('isTakip_' + tarih, JSON.stringify(veriler));
             const container = document.getElementById('personel-list');
-            const statsContainer = document.getElementById('stats-container');
-            container.innerHTML = '';
-            statsContainer.innerHTML = '';
+            const yonetimContainer = document.getElementById('yonetim-list');
+            const stats = document.getElementById('stats-container');
+            
+            container.innerHTML = ''; yonetimContainer.innerHTML = ''; stats.innerHTML = '';
             
             personeller.forEach(p => {
                 container.innerHTML += `<div class="flex items-center justify-between border-b pb-2">
-                    <span class="font-medium w-1/2">${p}</span>
-                    <button onclick="personelSil('${p}')" class="text-red-500 mr-2 text-xs">Sil</button>
-                    <input type="number" min="0" value="${veriler[p]}" class="w-20 p-2 border rounded" onchange="veriler['${p}'] = parseInt(this.value) || 0; guncelle();">
+                    <span class="font-medium">${p}</span>
+                    <input type="number" min="0" value="${veriler[p]}" class="w-20 p-2 border rounded text-center" onchange="veriler['${p}'] = parseInt(this.value) || 0; guncelle();">
                 </div>`;
-                statsContainer.innerHTML += `<div class="bg-blue-50 p-2 rounded text-center"><span class="block text-[10px] uppercase">${p}</span><span class="font-bold">${veriler[p]}</span></div>`;
+                
+                yonetimContainer.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                    <span>${p}</span>
+                    <button onclick="personelSil('${p}')" class="text-red-600 text-xs font-bold underline">Sil</button>
+                </div>`;
+
+                stats.innerHTML += `<div class="bg-blue-50 p-2 rounded text-center"><span class="block text-[10px] uppercase">${p}</span><span class="font-bold">${veriler[p]}</span></div>`;
             });
         }
 
         async function personelEkle() {
             const isim = document.getElementById('yeni-personel').value.toUpperCase();
             if(!isim || personeller.includes(isim)) return;
-            personeller.push(isim);
-            veriler[isim] = 0;
-            await githubGuncelle();
-            guncelle();
+            personeller.push(isim); veriler[isim] = 0;
+            await depoyaKaydet(); guncelle();
+            document.getElementById('yeni-personel').value = '';
         }
 
         async function personelSil(isim) {
-            personeller = personeller.filter(p => p !== isim);
-            delete veriler[isim];
-            await githubGuncelle();
-            guncelle();
+            personeller = personeller.filter(p => p !== isim); delete veriler[isim];
+            await depoyaKaydet(); guncelle();
         }
 
-        async function githubGuncelle() {
-            try {
-                await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ files: { 'personeller.json': { content: JSON.stringify(personeller) } } })
-                });
-                document.getElementById('status').innerText = "Personel listesi güncellendi.";
-            } catch (err) {
-                document.getElementById('status').innerText = "GitHub güncellenemedi.";
-            }
+        async function depoyaKaydet() {
+            const body = { message: "Personel güncellendi", content: utf8_to_b64(JSON.stringify(personeller)), sha: sha };
+            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
+                method: 'PUT', headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json(); sha = data.content.sha;
+            document.getElementById('status').innerText = "Personel listesi güncellendi.";
         }
 
         init();
