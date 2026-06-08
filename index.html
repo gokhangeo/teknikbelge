@@ -74,14 +74,10 @@
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                         Personel Yönetimi
                     </h2>
-                    <div class="flex gap-2 mb-2">
+                    <div class="flex gap-2 mb-4">
                         <input type="text" id="yeni-personel" placeholder="Yeni Personel Adı" class="border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none p-2.5 rounded-xl flex-grow text-sm">
                         <button onclick="personelEkle()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition text-sm">Ekle</button>
                     </div>
-                    <button onclick="varsayilanYukle()" class="w-full text-left text-xs text-indigo-500 hover:text-indigo-700 font-medium mb-4 flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3 3L22 4"></path></svg>
-                        Varsayılan 16 Personeli Geri Yükle / Sıfırla
-                    </button>
                     <div id="yonetim-list" class="max-h-44 overflow-y-auto border-t border-slate-100 pt-3 space-y-1">
                         <!-- Aktif Personeller Listesi -->
                     </div>
@@ -120,14 +116,6 @@
         const REPO = "gokhangeo/teknikbelge";
         const FILE_PERSONELLER = "personel.json";
         const FILE_VERILER = "veriler.json";
-
-        // Orijinal 16 kisilik varsayilan liste
-        const VARSAYILAN_PERSONELLER = [
-            "AHMET ÇELİK", "AYŞE ÇAKICI PEKÇETİN", "DUDU POYRAZ", "ENGİN UĞURLU", 
-            "HASAN İN", "HÜSEYİN POYRAZ", "KENAN BAYDEMİR", "MEHMET CEYLAN", 
-            "MUSTAFA BAYSAL", "MUSTAFA GÜRBÜZ", "MÜJDE TÜRKMEN", "NURHAN ARSLAN", 
-            "ÖZLEM AYDINLI", "SEVAL ÇELİK", "ŞEHMUS ÖZTÜRK", "ŞEKİP KORKMAZ"
-        ];
 
         let personeller = [];
         let tumVeriler = {}; 
@@ -211,7 +199,7 @@
                     return data.sha;
                 }
             } catch (e) {
-                console.warn("SHA sorgusu başarısız (Dosya yeni veya silinmiş olabilir):", path);
+                console.warn("SHA sorgusu başarısız:", path);
             }
             return null;
         }
@@ -226,10 +214,7 @@
             tarihInput.max = bugun; 
             document.getElementById('tarih-etiket').innerText = formatTarih(bugun);
 
-            personeller = JSON.parse(localStorage.getItem('isTakip_personeller'));
-            if (!personeller || personeller.length === 0) {
-                personeller = [...VARSAYILAN_PERSONELLER];
-            }
+            personeller = JSON.parse(localStorage.getItem('isTakip_personeller')) || [];
             tumVeriler = JSON.parse(localStorage.getItem('isTakip_tumVeriler')) || {};
             ekraniYenile();
 
@@ -246,7 +231,6 @@
                     githubOnline = true;
                 } else if(resPersoneller.status === 404) {
                     githubOnline = true;
-                    // GitHub'da bulunamadıysa (silindiyse), yerel listeyi veya varsayılanı yükleyip yazdır
                     await depoyaKaydetPersoneller();
                 } else {
                     githubOnline = false;
@@ -414,20 +398,6 @@
 
                     await depoyaKaydetPersoneller();
                     await depoyaKaydetVeriler();
-                    ekraniYenile();
-                }
-            );
-        }
-
-        // Varsayilan listeyi sifirdan yukleme ve kaydetme
-        function varsayilanYukle() {
-            customConfirm(
-                "Listeyi Sıfırla",
-                "Mevcut personel listesini silip orijinal 16 kişilik listeyi geri yüklemek istediğinize emin misiniz?",
-                async () => {
-                    setStatus("Varsayılan liste yükleniyor...");
-                    personeller = [...VARSAYILAN_PERSONELLER];
-                    await depoyaKaydetPersoneller();
                     ekraniYenile();
                 }
             );
