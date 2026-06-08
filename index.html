@@ -52,8 +52,6 @@
     </div>
 
     <script>
-        // API Anahtarı (Token) muhtemelen GitHub tarafından iptal edilmiş olabilir.
-        // Bu sebeple uygulama otomatik olarak Yerel (Local) moda geçecektir.
         const token = "ghp_" + "1Im4128x" + "UP1uC8Oo" + "v8yBd7oahk" + "2S6a0aGBTj";
         const REPO = "gokhangeo/teknikbelge";
         const FILE_PERSONELLER = "personel.json";
@@ -62,7 +60,6 @@
         let personeller = [];
         let tumVeriler = {};
         
-        // Tarihi bugüne ayarla
         const bugun = new Date().toISOString().split('T')[0];
         let seciliTarih = bugun;
         document.getElementById('secili-tarih').value = bugun;
@@ -78,7 +75,6 @@
                     'Accept': 'application/vnd.github.v3+json'
                 };
 
-                // 1. Personelleri Çek
                 const resPersonel = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, { headers });
                 if (!resPersonel.ok) throw new Error("Personel yetki veya bağlantı hatası.");
                 const dataP = await resPersonel.json();
@@ -86,7 +82,6 @@
                 personeller = Array.isArray(contentP) ? contentP : (contentP.personeller || []);
                 localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
 
-                // 2. İş Verilerini Çek
                 const resVeriler = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { headers });
                 if (resVeriler.ok) {
                     const dataV = await resVeriler.json();
@@ -98,10 +93,8 @@
                 document.getElementById('status-dot').className = "w-3 h-3 rounded-full bg-emerald-500";
                 
             } catch (e) {
-                // console.error yerine console.warn kullanarak sistemin hata yakalayıcısını tetiklemesini engelliyoruz.
-                console.warn("GitHub ile senkronize olunamadı (Token süresi dolmuş veya bağlantı yok). Yerel veriler kullanılıyor.");
+                console.warn("GitHub ile senkronize olunamadı. Yerel veriler kullanılıyor.");
                 
-                // Yerel (Tarayıcı) Verilerini Yükle
                 personeller = JSON.parse(localStorage.getItem('isTakip_personeller')) || [];
                 tumVeriler = JSON.parse(localStorage.getItem('isTakip_tumVeriler')) || {};
                 
@@ -114,7 +107,6 @@
 
         async function githubaKaydet(dosya, icerik) {
             try {
-                // Önce dosyanın güncel SHA kodunu al
                 const resGet = await fetch(`https://api.github.com/repos/${REPO}/contents/${dosya}`, {
                     headers: { 'Authorization': `token ${token}` }
                 });
@@ -124,7 +116,6 @@
                     sha = data.sha;
                 }
 
-                // Dosyayı güncelle
                 await fetch(`https://api.github.com/repos/${REPO}/contents/${dosya}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
@@ -177,14 +168,28 @@
             let gunToplam = 0;
             if (!tumVeriler[seciliTarih]) tumVeriler[seciliTarih] = {};
 
+            let genelToplamlar = {};
+            personeller.forEach(p => genelToplamlar[p] = 0);
+            
+            Object.values(tumVeriler).forEach(gunluk => {
+                Object.entries(gunluk).forEach(([kisi, adet]) => {
+                    if (genelToplamlar[kisi] !== undefined) {
+                        genelToplamlar[kisi] += (adet || 0);
+                    }
+                });
+            });
+
             personeller.forEach(p => {
                 let adet = tumVeriler[seciliTarih][p] || 0;
                 gunToplam += adet;
+                let genelAdet = genelToplamlar[p] || 0;
 
-                // İş Giriş Kartı
                 container.innerHTML += `
                     <div class="p-4 flex justify-between items-center hover:bg-slate-100 transition duration-150">
-                        <span class="font-medium text-slate-700">${p}</span>
+                        <div class="flex flex-col">
+                            <span class="font-medium text-slate-700">${p}</span>
+                            <span class="text-xs text-slate-500 font-semibold mt-0.5">Tüm Zamanlar: <span class="text-indigo-600">${genelAdet} İş</span></span>
+                        </div>
                         <div class="flex items-center gap-3">
                             <button onclick="degerDegistir('${p}', -1)" class="w-8 h-8 flex items-center justify-center bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 font-bold transition shadow-sm">-</button>
                             <span class="w-6 text-center font-bold text-lg text-slate-800">${adet}</span>
@@ -192,10 +197,12 @@
                         </div>
                     </div>`;
                 
-                // Yönetim Kartı
                 yonetim.innerHTML += `
                     <div class="flex justify-between items-center text-xs py-2 px-3 bg-slate-50 border border-slate-100 rounded-lg mb-1">
-                        <span class="font-semibold text-slate-600">${p}</span>
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-slate-600">${p}</span>
+                            <span class="text-slate-400 mt-0.5">Toplam: ${genelAdet} İş</span>
+                        </div>
                         <button onclick="personelSil('${p}')" class="text-rose-500 font-bold hover:underline">Sil</button>
                     </div>`;
             });
@@ -208,7 +215,6 @@
             ekraniYenile();
         }
 
-        // Uygulamayı Başlat
         init();
     </script>
 </body>
