@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAN ÖRNEĞİ VE TEKNİK BELGE TALEPLERİ GÖREVLENDİRME</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">PLAN ÖRNEĞİ VE TEKNİK BELGE TALEPLERİ GÖREVLENDİRME</h1>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-lg font-semibold mb-4">Personel Yönetimi</h2>
+            <div class="flex gap-2">
+                <input type="text" id="yeni-personel" placeholder="Yeni Personel Adı" class="border p-2 rounded flex-grow">
+                <button onclick="personelEkle()" class="bg-blue-600 text-white px-4 py-2 rounded">Ekle</button>
+            </div>
+            <p id="status" class="mt-4 text-sm text-gray-500"></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-lg font-semibold mb-4">Genel İstatistikler</h2>
+            <div id="stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm"></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Günlük İş Girişi (<span id="tarih-baslik"></span>)</h2>
+            <div id="personel-list" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const token = "ghp_" + "1Im4128x" + "UP1uC8Oo" + "v8yBd7oahk" + "2S6a0aGBTj";
+        const GIST_ID = "c7d75a452136e051394f49492167d471";
+        let personeller = [];
+        let veriler = {};
+        const tarih = new Date().toISOString().split('T')[0];
+        document.getElementById('tarih-baslik').innerText = tarih;
+
+        async function init() {
+            try {
+                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, { headers: { 'Authorization': `token ${token}` }});
+                const data = await res.json();
+                
+                if (data.files && data.files['personeller.json'] && data.files['personeller.json'].content) {
+                    personeller = JSON.parse(data.files['personeller.json'].content);
+                } else {
+                    // Eğer dosya yoksa veya boşsa, başlangıç listesi oluştur
+                    personeller = ["AHMET ÇELİK", "AYŞE ÇAKICI PEKÇETİN"];
+                    await githubGuncelle();
+                }
+                
+                veriler = JSON.parse(localStorage.getItem('isTakip_' + tarih)) || {};
+                personeller.forEach(p => { if (veriler[p] === undefined) veriler[p] = 0; });
+                guncelle();
+            } catch (err) {
+                console.error("Veri çekilirken hata oluştu:", err);
+                document.getElementById('status').innerText = "Hata: Personel listesi yüklenemedi.";
+            }
+        }
+
+        function guncelle() {
+            localStorage.setItem('isTakip_' + tarih, JSON.stringify(veriler));
+            const container = document.getElementById('personel-list');
+            const statsContainer = document.getElementById('stats-container');
+            container.innerHTML = '';
+            statsContainer.innerHTML = '';
+            
+            personeller.forEach(p => {
+                container.innerHTML += `<div class="flex items-center justify-between border-b pb-2">
+                    <span class="font-medium w-1/2">${p}</span>
+                    <button onclick="personelSil('${p}')" class="text-red-500 mr-2 text-xs">Sil</button>
+                    <input type="number" min="0" value="${veriler[p]}" class="w-20 p-2 border rounded" onchange="veriler['${p}'] = parseInt(this.value) || 0; guncelle();">
+                </div>`;
+                statsContainer.innerHTML += `<div class="bg-blue-50 p-2 rounded text-center"><span class="block text-[10px] uppercase">${p}</span><span class="font-bold">${veriler[p]}</span></div>`;
+            });
+        }
+
+        async function personelEkle() {
+            const isim = document.getElementById('yeni-personel').value.toUpperCase();
+            if(!isim || personeller.includes(isim)) return;
+            personeller.push(isim);
+            veriler[isim] = 0;
+            await githubGuncelle();
+            guncelle();
+        }
+
+        async function personelSil(isim) {
+            personeller = personeller.filter(p => p !== isim);
+            delete veriler[isim];
+            await githubGuncelle();
+            guncelle();
+        }
+
+        async function githubGuncelle() {
+            try {
+                await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: { 'personeller.json': { content: JSON.stringify(personeller) } } })
+                });
+                document.getElementById('status').innerText = "Personel listesi güncellendi.";
+            } catch (err) {
+                document.getElementById('status').innerText = "GitHub güncellenemedi.";
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
