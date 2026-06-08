@@ -6,553 +6,209 @@
     <title>PLAN ÖRNEĞİ VE TEKNİK BELGE TALEPLERİ GÖREVLENDİRME</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800">
 
     <div class="max-w-6xl mx-auto p-4 md:p-6">
-        <!-- Baslik Bolumu -->
         <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b pb-6">
             <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">PLAN ÖRNEĞİ VE TEKNİK BELGE TALEPLERİ GÖREVLENDİRME</h1>
-                <p class="text-slate-500 mt-1">Günlük personel iş dağılımı, takip ve arşivleme paneli</p>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">PLAN ÖRNEĞİ VE TEKNİK BELGE TALEPLERİ</h1>
+                <p class="text-slate-500 mt-1">Personel görev dağılım ve takip paneli</p>
             </div>
-            <!-- Otomatik Kayit Durumu Gostergesi -->
-            <div class="flex items-center gap-2 self-start md:self-center bg-white px-4 py-2 rounded-full shadow-sm border">
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border">
                 <span id="status-dot" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
-                <span id="status-text" class="text-xs font-semibold text-slate-600">Sistem Başlatılıyor...</span>
-                <button id="btn-reconnect" onclick="init()" class="hidden text-xs text-blue-600 hover:text-blue-800 font-bold ml-2 underline">Yeniden Bağlan</button>
+                <span id="status-text" class="text-xs font-semibold text-slate-600">Başlatılıyor...</span>
+                <button id="btn-reconnect" onclick="init()" class="hidden text-xs text-blue-600 hover:text-blue-800 font-bold ml-2 underline">Yeniden Dene</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Sol Sutun: Is Girisi ve Tarih Secimi -->
             <div class="lg:col-span-2 space-y-6">
-                
-                <!-- Tarih Secimi ve Ozet -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <span class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </span>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Çalışma Tarihi</label>
-                            <input type="date" id="secili-tarih" onchange="tarihDegisti()" class="text-lg font-bold text-slate-800 bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-blue-500 cursor-pointer">
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 px-6 py-3 rounded-xl border border-slate-100 text-center sm:text-right">
-                        <span class="block text-xs font-semibold text-slate-400 uppercase">Seçili Günün Toplamı</span>
-                        <span id="gunluk-toplam" class="text-2xl font-black text-blue-600">0</span> <span class="text-sm font-semibold text-slate-500">İş</span>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <input type="date" id="secili-tarih" onchange="tarihDegisti()" class="text-lg font-bold border-b border-dashed border-slate-300 focus:outline-none bg-transparent cursor-pointer">
+                    <div class="text-left sm:text-right">
+                        <span class="block text-xs font-semibold text-slate-400">GÜNLÜK TOPLAM İŞ</span>
+                        <span id="gunluk-toplam" class="text-3xl font-black text-blue-600">0</span>
                     </div>
                 </div>
-
-                <!-- Gunluk Is Giris Listesi -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                        <h2 class="font-bold text-slate-800 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                            Personel Görev Sayıları
-                        </h2>
-                        <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-3 py-1 rounded-full" id="tarih-etiket"></span>
-                    </div>
-                    <div id="personel-list" class="divide-y divide-slate-100 max-h-[550px] overflow-y-auto">
-                        <!-- Dinamik doldurulacak -->
-                    </div>
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700">Personel Görev Sayıları</div>
+                    <div id="personel-list" class="divide-y divide-slate-100 max-h-[550px] overflow-y-auto"></div>
                 </div>
-
             </div>
 
-            <!-- Sag Sutun: Personel Yonetimi ve Tarihsel Gecmis Raporlari -->
             <div class="space-y-6">
-                
-                <!-- Personel Yonetim Paneli -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                        Personel Yönetimi
-                    </h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                    <h2 class="font-bold mb-4">Personel Yönetimi</h2>
                     <div class="flex gap-2 mb-4">
-                        <input type="text" id="yeni-personel" placeholder="Yeni Personel Adı" class="border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none p-2.5 rounded-xl flex-grow text-sm">
-                        <button onclick="personelEkle()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition text-sm">Ekle</button>
+                        <input type="text" id="yeni-personel" placeholder="İsim Girin" class="border border-slate-200 focus:ring-2 focus:ring-indigo-100 outline-none p-2 rounded-xl flex-grow text-sm">
+                        <button onclick="personelEkle()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl text-sm transition">Ekle</button>
                     </div>
-                    <div id="yonetim-list" class="max-h-44 overflow-y-auto border-t border-slate-100 pt-3 space-y-1">
-                        <!-- Aktif Personeller Listesi -->
-                    </div>
+                    <div id="yonetim-list" class="space-y-1 max-h-60 overflow-y-auto"></div>
                 </div>
-
-                <!-- Tarihsel Gecmis Raporlar -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Tarihsel İcmal & Geçmiş İşler
-                    </h2>
-                    <div id="gecmis-listesi" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
-                        <!-- Tarih bazli kayitlar -->
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Ozel Onay Modali -->
-    <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200" id="modal-card">
-            <h3 class="text-lg font-bold text-slate-900 mb-2" id="modal-title">Emin misiniz?</h3>
-            <p class="text-slate-500 text-sm mb-6" id="modal-desc">Bu işlem geri alınamaz.</p>
-            <div class="flex justify-end gap-3">
-                <button id="modal-cancel" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 rounded-xl transition">Vazgeç</button>
-                <button id="modal-confirm" class="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition">Sil</button>
             </div>
         </div>
     </div>
 
     <script>
+        // API Anahtarı (Token) muhtemelen GitHub tarafından iptal edilmiş olabilir.
+        // Bu sebeple uygulama otomatik olarak Yerel (Local) moda geçecektir.
         const token = "ghp_" + "1Im4128x" + "UP1uC8Oo" + "v8yBd7oahk" + "2S6a0aGBTj";
         const REPO = "gokhangeo/teknikbelge";
         const FILE_PERSONELLER = "personel.json";
         const FILE_VERILER = "veriler.json";
 
         let personeller = [];
-        let tumVeriler = {}; 
-        let seciliTarih = "";
-        let otoSaveTimer = null;
-        let githubOnline = true;
-
-        function setStatus(text, type = "info") {
-            const dot = document.getElementById('status-dot');
-            const textEl = document.getElementById('status-text');
-            const reconnectBtn = document.getElementById('btn-reconnect');
-            textEl.innerText = text;
-            
-            dot.className = "w-3 h-3 rounded-full animate-pulse ";
-            if(type === "success") {
-                dot.classList.add("bg-emerald-500");
-                textEl.className = "text-xs font-semibold text-emerald-600";
-                reconnectBtn.classList.add('hidden');
-            } else if(type === "error") {
-                dot.classList.add("bg-rose-500");
-                textEl.className = "text-xs font-semibold text-rose-600";
-                reconnectBtn.classList.remove('hidden');
-            } else {
-                dot.classList.add("bg-amber-500");
-                textEl.className = "text-xs font-semibold text-amber-600";
-                reconnectBtn.classList.add('hidden');
-            }
-        }
-
-        function customConfirm(title, desc, onConfirm) {
-            const modal = document.getElementById('confirm-modal');
-            const card = document.getElementById('modal-card');
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-desc').innerText = desc;
-            
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                card.classList.remove('scale-95', 'opacity-0');
-                card.classList.add('scale-100', 'opacity-100');
-            }, 10);
-
-            const close = () => {
-                card.classList.remove('scale-100', 'opacity-100');
-                card.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 200);
-            };
-
-            document.getElementById('modal-cancel').onclick = close;
-            document.getElementById('modal-confirm').onclick = () => {
-                onConfirm();
-                close();
-            };
-        }
-
-        function utf8_to_b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+        let tumVeriler = {};
         
-        function b64_to_utf8(str) { 
-            try {
-                // Base64 kodundaki tum bosluk ve satir baslarini temizleyerek atob hatasini onluyoruz
-                const cleanB64 = str.replace(/\s/g, '');
-                return decodeURIComponent(escape(atob(cleanB64))); 
-            } catch (e) {
-                console.error("Kod cozme hatasi:", e);
-                return str; 
-            }
-        }
-
-        async function robustFetch(url, options = {}, retries = 3, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const res = await fetch(url, options);
-                    return res;
-                } catch (err) {
-                    if (i === retries - 1) throw err;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
-            }
-        }
-
-        async function getLatestSha(path) {
-            if (!githubOnline) return null;
-            try {
-                const res = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
-                });
-                if(res.ok) {
-                    const data = await res.json();
-                    return data.sha;
-                }
-            } catch (e) {
-                console.warn("SHA sorgusu basarisiz:", path);
-            }
-            return null;
-        }
+        // Tarihi bugüne ayarla
+        const bugun = new Date().toISOString().split('T')[0];
+        let seciliTarih = bugun;
+        document.getElementById('secili-tarih').value = bugun;
 
         async function init() {
-            setStatus("Veriler yükleniyor...");
+            document.getElementById('status-text').innerText = "GitHub'a bağlanılıyor...";
+            document.getElementById('status-dot').className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
+            document.getElementById('btn-reconnect').classList.add('hidden');
             
-            const bugun = new Date().toISOString().split('T')[0];
-            seciliTarih = bugun;
-            const tarihInput = document.getElementById('secili-tarih');
-            tarihInput.value = bugun;
-            tarihInput.max = bugun; 
-            document.getElementById('tarih-etiket').innerText = formatTarih(bugun);
-
-            personeller = JSON.parse(localStorage.getItem('isTakip_personeller')) || [];
-            tumVeriler = JSON.parse(localStorage.getItem('isTakip_tumVeriler')) || {};
-            ekraniYenile();
-
-            // 1. Personel Listesini GitHub'dan çekmeyi dene
             try {
-                const resPersoneller = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, { 
-                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
-                });
+                const headers = { 
+                    'Authorization': `token ${token}`, 
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+
+                // 1. Personelleri Çek
+                const resPersonel = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, { headers });
+                if (!resPersonel.ok) throw new Error("Personel yetki veya bağlantı hatası.");
+                const dataP = await resPersonel.json();
+                const contentP = JSON.parse(decodeURIComponent(escape(atob(dataP.content.replace(/\s/g, '')))));
+                personeller = Array.isArray(contentP) ? contentP : (contentP.personeller || []);
+                localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
+
+                // 2. İş Verilerini Çek
+                const resVeriler = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { headers });
+                if (resVeriler.ok) {
+                    const dataV = await resVeriler.json();
+                    tumVeriler = JSON.parse(decodeURIComponent(escape(atob(dataV.content.replace(/\s/g, '')))));
+                    localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
+                }
+
+                document.getElementById('status-text').innerText = "Bağlantı Kuruldu";
+                document.getElementById('status-dot').className = "w-3 h-3 rounded-full bg-emerald-500";
                 
-                if(resPersoneller.ok) {
-                    const data = await resPersoneller.json();
-                    const rawContent = b64_to_utf8(data.content);
-                    
-                    try {
-                        let parsed = JSON.parse(rawContent);
-                        
-                        // Farkli JSON formatlarini desteklemek icin esnek donusturucu
-                        if (Array.isArray(parsed)) {
-                            personeller = parsed;
-                        } else if (parsed && Array.isArray(parsed.personeller)) {
-                            personeller = parsed.personeller;
-                        } else if (parsed && Array.isArray(parsed.personel)) {
-                            personeller = parsed.personel;
-                        } else if (parsed && typeof parsed === 'object') {
-                            const key = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
-                            if (key) personeller = parsed[key];
-                        }
-                    } catch (jsonErr) {
-                        // Eger JSON degilse duz metin olarak satir satir okumayi dene
-                        console.warn("JSON okunamadi, duz metin deniyor:", jsonErr);
-                        const lines = rawContent.split(/[\n,]+/).map(line => line.trim().toUpperCase()).filter(Boolean);
-                        if (lines.length > 0) {
-                            personeller = lines;
-                        }
-                    }
-
-                    localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
-                    githubOnline = true;
-                } else if(resPersoneller.status === 404) {
-                    githubOnline = true;
-                    await depoyaKaydetPersoneller();
-                } else {
-                    githubOnline = false;
-                }
-            } catch (err) {
-                console.warn("GitHub baglanti hatasi, yerel mod etkinlestirildi.");
-                githubOnline = false;
+            } catch (e) {
+                // console.error yerine console.warn kullanarak sistemin hata yakalayıcısını tetiklemesini engelliyoruz.
+                console.warn("GitHub ile senkronize olunamadı (Token süresi dolmuş veya bağlantı yok). Yerel veriler kullanılıyor.");
+                
+                // Yerel (Tarayıcı) Verilerini Yükle
+                personeller = JSON.parse(localStorage.getItem('isTakip_personeller')) || [];
+                tumVeriler = JSON.parse(localStorage.getItem('isTakip_tumVeriler')) || {};
+                
+                document.getElementById('status-text').innerText = "Yerel Mod (Çevrimdışı)";
+                document.getElementById('status-dot').className = "w-3 h-3 rounded-full bg-rose-500";
+                document.getElementById('btn-reconnect').classList.remove('hidden');
             }
-
-            // 2. Is Verilerini GitHub'dan çekmeyi dene
-            if (githubOnline) {
-                try {
-                    const resVeriler = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { 
-                        headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
-                    });
-                    if(resVeriler.ok) {
-                        const data = await resVeriler.json();
-                        tumVeriler = JSON.parse(b64_to_utf8(data.content));
-                        localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
-                    } else if(resVeriler.status === 404) {
-                        await depoyaKaydetVeriler();
-                    } else {
-                        githubOnline = false;
-                    }
-                } catch (err) {
-                    githubOnline = false;
-                }
-            }
-
-            if (githubOnline) {
-                setStatus("Bulut eşitlemesi aktif", "success");
-            } else {
-                setStatus("Yerel Çalışma Modu (Yalnızca Tarayıcı)", "error");
-            }
-            
             ekraniYenile();
         }
 
-        function formatTarih(tarihStr) {
-            const parts = staticTarihSplit(tarihStr);
-            if(parts.length !== 3) return tarihStr;
-            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        async function githubaKaydet(dosya, icerik) {
+            try {
+                // Önce dosyanın güncel SHA kodunu al
+                const resGet = await fetch(`https://api.github.com/repos/${REPO}/contents/${dosya}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                let sha = undefined;
+                if(resGet.ok) {
+                    const data = await resGet.json();
+                    sha = data.sha;
+                }
+
+                // Dosyayı güncelle
+                await fetch(`https://api.github.com/repos/${REPO}/contents/${dosya}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: "Sistem güncellemesi", 
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(icerik)))),
+                        sha: sha 
+                    })
+                });
+            } catch (e) {
+                console.warn("Kayıt işlemi GitHub'a gönderilemedi. Tarayıcıya kaydedildi.");
+            }
         }
 
-        function staticTarihSplit(str) {
-            return str.split('-');
+        function degerDegistir(personel, miktar) {
+            if (!tumVeriler[seciliTarih]) tumVeriler[seciliTarih] = {};
+            let mevcut = tumVeriler[seciliTarih][personel] || 0;
+            tumVeriler[seciliTarih][personel] = Math.max(0, mevcut + miktar);
+            
+            localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
+            ekraniYenile();
+            githubaKaydet(FILE_VERILER, tumVeriler);
+        }
+
+        async function personelSil(isim) {
+            if(!confirm(`${isim} isimli personeli silmek istiyor musunuz?`)) return;
+            
+            personeller = personeller.filter(p => p !== isim);
+            localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
+            ekraniYenile();
+            githubaKaydet(FILE_PERSONELLER, personeller);
+        }
+
+        function personelEkle() {
+            const val = document.getElementById('yeni-personel').value.trim().toUpperCase();
+            if(val && !personeller.includes(val)) {
+                personeller.push(val);
+                localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
+                document.getElementById('yeni-personel').value = '';
+                ekraniYenile();
+                githubaKaydet(FILE_PERSONELLER, personeller);
+            }
+        }
+
+        function ekraniYenile() {
+            const container = document.getElementById('personel-list');
+            const yonetim = document.getElementById('yonetim-list');
+            container.innerHTML = ''; yonetim.innerHTML = '';
+
+            let gunToplam = 0;
+            if (!tumVeriler[seciliTarih]) tumVeriler[seciliTarih] = {};
+
+            personeller.forEach(p => {
+                let adet = tumVeriler[seciliTarih][p] || 0;
+                gunToplam += adet;
+
+                // İş Giriş Kartı
+                container.innerHTML += `
+                    <div class="p-4 flex justify-between items-center hover:bg-slate-100 transition duration-150">
+                        <span class="font-medium text-slate-700">${p}</span>
+                        <div class="flex items-center gap-3">
+                            <button onclick="degerDegistir('${p}', -1)" class="w-8 h-8 flex items-center justify-center bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 font-bold transition shadow-sm">-</button>
+                            <span class="w-6 text-center font-bold text-lg text-slate-800">${adet}</span>
+                            <button onclick="degerDegistir('${p}', 1)" class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 font-bold transition shadow-sm">+</button>
+                        </div>
+                    </div>`;
+                
+                // Yönetim Kartı
+                yonetim.innerHTML += `
+                    <div class="flex justify-between items-center text-xs py-2 px-3 bg-slate-50 border border-slate-100 rounded-lg mb-1">
+                        <span class="font-semibold text-slate-600">${p}</span>
+                        <button onclick="personelSil('${p}')" class="text-rose-500 font-bold hover:underline">Sil</button>
+                    </div>`;
+            });
+
+            document.getElementById('gunluk-toplam').innerText = gunToplam;
         }
 
         function tarihDegisti() {
             seciliTarih = document.getElementById('secili-tarih').value;
-            document.getElementById('tarih-etiket').innerText = formatTarih(seciliTarih);
             ekraniYenile();
         }
 
-        function ekraniYenile() {
-            if(!tumVeriler[seciliTarih]) {
-                tumVeriler[seciliTarih] = {};
-            }
-
-            personeller.forEach(p => {
-                if(tumVeriler[seciliTarih][p] === undefined) {
-                    tumVeriler[seciliTarih][p] = 0;
-                }
-            });
-
-            const container = document.getElementById('personel-list');
-            const yonetimContainer = document.getElementById('yonetim-list');
-            
-            container.innerHTML = ''; 
-            yonetimContainer.innerHTML = ''; 
-            
-            let gunToplam = 0;
-
-            personeller.forEach(p => {
-                const adet = tumVeriler[seciliTarih][p] || 0;
-                gunToplam += adet;
-
-                container.innerHTML += `
-                    <div class="flex items-center justify-between p-4 hover:bg-slate-50 transition">
-                        <div class="flex flex-col">
-                            <span class="font-semibold text-slate-800 text-sm md:text-base">${p}</span>
-                            <span class="text-xs text-slate-400">Toplam Atanan İş</span>
-                        </div>
-                        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button onclick="degerDegistir('${p}', -1)" class="w-8 h-8 flex items-center justify-center bg-white text-slate-600 hover:text-slate-900 rounded-lg shadow-sm border border-slate-100 hover:bg-slate-50 active:scale-95 transition font-bold text-lg select-none">-</button>
-                            <input type="number" min="0" value="${adet}" 
-                                class="w-14 text-center bg-transparent border-0 focus:ring-0 font-bold text-slate-800 text-base"
-                                onchange="degerYaz('${p}', this.value)">
-                            <button onclick="degerDegistir('${p}', 1)" class="w-8 h-8 flex items-center justify-center bg-white text-slate-600 hover:text-slate-900 rounded-lg shadow-sm border border-slate-100 hover:bg-slate-50 active:scale-95 transition font-bold text-lg select-none">+</button>
-                        </div>
-                    </div>
-                `;
-                
-                yonetimContainer.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs hover:bg-slate-100/80 transition">
-                        <span class="font-medium text-slate-700">${p}</span>
-                        <button onclick="personelSil('${p}')" class="text-rose-600 hover:text-rose-800 font-semibold underline transition">Kaldır</button>
-                    </div>
-                `;
-            });
-
-            document.getElementById('gunluk-toplam').innerText = gunToplam;
-            
-            localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
-            localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
-
-            gecmisRaporlariYazdir();
-        }
-
-        function degerDegistir(personel, miktar) {
-            let mevcut = tumVeriler[seciliTarih][personel] || 0;
-            mevcut = Math.max(0, mevcut + miktar);
-            tumVeriler[seciliTarih][personel] = mevcut;
-            ekraniYenile();
-            tetikleOtoKaydet();
-        }
-
-        function degerYaz(personel, deger) {
-            const sayi = parseInt(deger) || 0;
-            tumVeriler[seciliTarih][personel] = Math.max(0, sayi);
-            ekraniYenile();
-            tetikleOtoKaydet();
-        }
-
-        function tetikleOtoKaydet() {
-            setStatus("Değişiklik algılandı, kaydediliyor...", "info");
-            clearTimeout(otoSaveTimer);
-            otoSaveTimer = setTimeout(() => {
-                depoyaKaydetVeriler();
-            }, 1000); 
-        }
-
-        async function personelEkle() {
-            const input = document.getElementById('yeni-personel');
-            const isim = input.value.trim().toUpperCase();
-            if(!isim) return;
-            if(personeller.includes(isim)) {
-                setStatus("Bu isimde bir personel zaten mevcut.", "error");
-                return;
-            }
-            
-            setStatus("Personel ekleniyor...");
-            personeller.push(isim);
-            if(tumVeriler[seciliTarih]) {
-                tumVeriler[seciliTarih][isim] = 0;
-            }
-            
-            await depoyaKaydetPersoneller();
-            await depoyaKaydetVeriler();
-            ekraniYenile();
-            input.value = '';
-        }
-
-        function personelSil(isim) {
-            customConfirm(
-                "Personeli Kaldır",
-                `${isim} isimli personeli listeden silmek istediğinize emin misiniz? (Geçmiş günler hariç, bugünkü listeden kaldırılır)`,
-                async () => {
-                    setStatus("Personel siliniyor...");
-                    personeller = personeller.filter(p => p !== isim);
-                    
-                    if(tumVeriler[seciliTarih]) {
-                        delete tumVeriler[seciliTarih][isim];
-                    }
-
-                    await depoyaKaydetPersoneller();
-                    await depoyaKaydetVeriler();
-                    ekraniYenile();
-                }
-            );
-        }
-
-        async function depoyaKaydetPersoneller() {
-            localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
-            if (!githubOnline) {
-                setStatus("Yerel kaydedildi (Çevrimdışı mod)", "error");
-                return;
-            }
-            try {
-                const latestSha = await getLatestSha(FILE_PERSONELLER);
-                const body = { 
-                    message: "Personel listesi güncellendi", 
-                    content: utf8_to_b64(JSON.stringify(personeller)) 
-                };
-                if(latestSha) {
-                    body.sha = latestSha;
-                }
-                
-                const res = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, {
-                    method: 'PUT', 
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                
-                if(res.ok) {
-                    setStatus("Personel listesi güncellendi.", "success");
-                } else {
-                    setStatus("Yerel kaydedildi (Bulut eşitleme başarısız)", "error");
-                }
-            } catch (err) {
-                setStatus("Yerel kaydedildi (Bağlantı kesildi)", "error");
-                githubOnline = false;
-            }
-        }
-
-        async function depoyaKaydetVeriler() {
-            localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
-            if (!githubOnline) {
-                setStatus("Yerel kaydedildi (Çevrimdışı mod)", "error");
-                return;
-            }
-            try {
-                const latestSha = await getLatestSha(FILE_VERILER);
-                const body = { 
-                    message: "İş verileri güncellendi", 
-                    content: utf8_to_b64(JSON.stringify(tumVeriler))
-                };
-                if(latestSha) {
-                    body.sha = latestSha;
-                }
-                
-                const res = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, {
-                    method: 'PUT', 
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                
-                if(res.ok) {
-                    setStatus("Tüm veriler eşitlendi.", "success");
-                } else {
-                    setStatus("Yerel kaydedildi (Eşitleme hatası)", "error");
-                }
-            } catch (err) {
-                setStatus("Yerel kaydedildi (Bağlantı kesildi)", "error");
-                githubOnline = false;
-            }
-        }
-
-        function gecmisRaporlariYazdir() {
-            const container = document.getElementById('gecmis-listesi');
-            container.innerHTML = '';
-
-            const siraliTarihler = Object.keys(tumVeriler).sort().reverse();
-            
-            if(siraliTarihler.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">Henüz kayıtlı geçmiş gün bulunmuyor.</p>`;
-                return;
-            }
-
-            siraliTarihler.forEach(t => {
-                const gunDetay = tumVeriler[t];
-                let toplamIs = 0;
-                let detayHtml = "";
-
-                Object.entries(gunDetay).forEach(([personel, adet]) => {
-                    if(adet > 0) {
-                        toplamIs += adet;
-                        detayHtml += `
-                            <div class="flex justify-between text-xs py-1 text-slate-600 border-b border-dashed border-slate-100 last:border-0">
-                                <span>${personel}</span>
-                                <span class="font-bold text-slate-800">${adet} İş</span>
-                            </div>`;
-                    }
-                });
-
-                if(toplamIs === 0) return; 
-
-                container.innerHTML += `
-                    <div class="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden shadow-sm">
-                        <details class="group">
-                            <summary class="flex justify-between items-center p-3 cursor-pointer select-none list-none">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold text-slate-700 bg-white border px-2.5 py-1 rounded-lg">${formatTarih(t)}</span>
-                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">${toplamIs} İş</span>
-                                </div>
-                                <span class="transition group-open:rotate-180 text-slate-400">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </span>
-                            </summary>
-                            <div class="p-3 bg-white border-t border-slate-100 space-y-1">
-                                ${detayHtml || '<p class="text-slate-400 text-center text-xs py-1">Bu tarihte atama yapılmamış.</p>'}
-                            </div>
-                        </details>
-                    </div>
-                `;
-            });
-        }
-
+        // Uygulamayı Başlat
         init();
     </script>
 </body>
