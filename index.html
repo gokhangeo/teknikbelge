@@ -173,7 +173,17 @@
         }
 
         function utf8_to_b64(str) { return btoa(unescape(encodeURIComponent(str))); }
-        function b64_to_utf8(str) { return decodeURIComponent(escape(atob(str))); }
+        
+        function b64_to_utf8(str) { 
+            try {
+                // Base64 kodundaki tum bosluk ve satir baslarini temizleyerek atob hatasini onluyoruz
+                const cleanB64 = str.replace(/\s/g, '');
+                return decodeURIComponent(escape(atob(cleanB64))); 
+            } catch (e) {
+                console.error("Kod cozme hatasi:", e);
+                return str; 
+            }
+        }
 
         async function robustFetch(url, options = {}, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
@@ -199,7 +209,7 @@
                     return data.sha;
                 }
             } catch (e) {
-                console.warn("SHA sorgusu başarısız:", path);
+                console.warn("SHA sorgusu basarisiz:", path);
             }
             return null;
         }
@@ -226,7 +236,31 @@
                 
                 if(resPersoneller.ok) {
                     const data = await resPersoneller.json();
-                    personeller = JSON.parse(b64_to_utf8(data.content));
+                    const rawContent = b64_to_utf8(data.content);
+                    
+                    try {
+                        let parsed = JSON.parse(rawContent);
+                        
+                        // Farkli JSON formatlarini desteklemek icin esnek donusturucu
+                        if (Array.isArray(parsed)) {
+                            personeller = parsed;
+                        } else if (parsed && Array.isArray(parsed.personeller)) {
+                            personeller = parsed.personeller;
+                        } else if (parsed && Array.isArray(parsed.personel)) {
+                            personeller = parsed.personel;
+                        } else if (parsed && typeof parsed === 'object') {
+                            const key = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+                            if (key) personeller = parsed[key];
+                        }
+                    } catch (jsonErr) {
+                        // Eger JSON degilse duz metin olarak satir satir okumayi dene
+                        console.warn("JSON okunamadi, duz metin deniyor:", jsonErr);
+                        const lines = rawContent.split(/[\n,]+/).map(line => line.trim().toUpperCase()).filter(Boolean);
+                        if (lines.length > 0) {
+                            personeller = lines;
+                        }
+                    }
+
                     localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
                     githubOnline = true;
                 } else if(resPersoneller.status === 404) {
@@ -236,11 +270,11 @@
                     githubOnline = false;
                 }
             } catch (err) {
-                console.warn("GitHub bağlantı hatası, yerel mod etkinleşti.");
+                console.warn("GitHub baglanti hatasi, yerel mod etkinlestirildi.");
                 githubOnline = false;
             }
 
-            // 2. İş Verilerini GitHub'dan çekmeyi dene
+            // 2. Is Verilerini GitHub'dan çekmeyi dene
             if (githubOnline) {
                 try {
                     const resVeriler = await robustFetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { 
