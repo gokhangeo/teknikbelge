@@ -88,21 +88,19 @@
             document.getElementById('btn-reconnect').classList.add('hidden');
             
             try {
-                const ts = new Date().getTime(); // Önbelleği önlemek için
                 const headers = { 
                     'Authorization': `token ${token}`, 
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Cache-Control': 'no-cache'
+                    'Accept': 'application/vnd.github.v3+json'
                 };
 
-                const resPersonel = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}?t=${ts}`, { headers });
+                const resPersonel = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PERSONELLER}`, { headers });
                 if (!resPersonel.ok) throw new Error("Personel yetki veya bağlantı hatası.");
                 const dataP = await resPersonel.json();
                 const contentP = JSON.parse(decodeURIComponent(escape(atob(dataP.content.replace(/\s/g, '')))));
                 personeller = Array.isArray(contentP) ? contentP : (contentP.personeller || []);
                 localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
 
-                const resVeriler = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}?t=${ts}`, { headers });
+                const resVeriler = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_VERILER}`, { headers });
                 if (resVeriler.ok) {
                     const dataV = await resVeriler.json();
                     tumVeriler = JSON.parse(decodeURIComponent(escape(atob(dataV.content.replace(/\s/g, '')))));
@@ -127,11 +125,10 @@
 
         async function githubaKaydet(dosya, icerik) {
             try {
-                const ts = new Date().getTime(); // GitHub'ın eski dosyayı getirmesini engeller
-                const resGet = await fetch(`https://api.github.com/repos/${REPO}/contents/${dosya}?t=${ts}`, {
-                    headers: { 'Authorization': `token ${token}`, 'Cache-Control': 'no-cache' }
+                // Kayıtların üst üste binip hata vermesini engellemek için zaman etiketi (t) eklendi
+                const resGet = await fetch(`https://api.github.com/repos/${REPO}/contents/${dosya}?t=${new Date().getTime()}`, {
+                    headers: { 'Authorization': `token ${token}` }
                 });
-                
                 let sha = undefined;
                 if(resGet.ok) {
                     const data = await resGet.json();
@@ -152,22 +149,14 @@
             }
         }
 
-        // Hızlı tıklamalar ve yazmalarda GitHub'ın hata vermemesi için bekleme (debounce) sistemi
-        let saveTimers = {};
-        function gecikmeliKaydet(dosya, icerik) {
-            if (saveTimers[dosya]) clearTimeout(saveTimers[dosya]);
-            saveTimers[dosya] = setTimeout(() => {
-                githubaKaydet(dosya, icerik);
-            }, 1000); // 1 saniye bekleyip kaydeder
-        }
-
+        // Artırma/azaltma tuşları için
         function degerDegistir(personel, tip, miktar) {
             let data = tumVeriler[seciliTarih]?.[personel];
             let mevcut = 0;
             
-            // Eski verilerle (sadece sayı içeren) tam uyumluluk kontrolü
+            // Eski sayısal verilerle uyumluluk
             if (typeof data === 'number') {
-                mevcut = (tip === 'is') ? data : 0;
+                mevcut = tip === 'is' ? data : 0;
             } else if (data) {
                 mevcut = data[tip] || 0;
             }
@@ -175,13 +164,14 @@
             degerBelirle(personel, tip, mevcut + miktar);
         }
 
+        // Elle değer girildiğinde veya değiştirildiğinde çalışır
         function degerBelirle(personel, tip, yeniDeger) {
             yeniDeger = parseInt(yeniDeger) || 0;
             if(yeniDeger < 0) yeniDeger = 0;
 
             if (!tumVeriler[seciliTarih]) tumVeriler[seciliTarih] = {};
             
-            // Eski veriler varsa formata uygun hale getir
+            // Eski veriler (sadece sayı) varsa yeni obje formatına dönüştür
             if (typeof tumVeriler[seciliTarih][personel] === 'number') {
                 tumVeriler[seciliTarih][personel] = { 
                     is: tumVeriler[seciliTarih][personel], 
@@ -198,7 +188,7 @@
             
             localStorage.setItem('isTakip_tumVeriler', JSON.stringify(tumVeriler));
             ekraniYenile();
-            gecikmeliKaydet(FILE_VERILER, tumVeriler); // Anında değil, gecikmeli kaydet
+            githubaKaydet(FILE_VERILER, tumVeriler);
         }
 
         async function personelSil(isim) {
@@ -207,7 +197,7 @@
             personeller = personeller.filter(p => p !== isim);
             localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
             ekraniYenile();
-            gecikmeliKaydet(FILE_PERSONELLER, personeller);
+            githubaKaydet(FILE_PERSONELLER, personeller);
         }
 
         function personelEkle() {
@@ -217,7 +207,7 @@
                 localStorage.setItem('isTakip_personeller', JSON.stringify(personeller));
                 document.getElementById('yeni-personel').value = '';
                 ekraniYenile();
-                gecikmeliKaydet(FILE_PERSONELLER, personeller);
+                githubaKaydet(FILE_PERSONELLER, personeller);
             }
         }
 
